@@ -23,12 +23,10 @@ main = shakeArgs shakeOptions $ do
         tags_paths :: [(Tag, FilePath)] <- do
             forM postFiles $ \postFile -> do
                 postFileLines <- readFileLines postFile
-                let frontmatterStart:frontmatterEnd:_ =
+                let fmStart:fmEnd:_ =
                         elemIndices "---" postFileLines
                     frontmatter =
-                        substr (frontmatterStart + 1) frontmatterEnd
-                            postFileLines
-                        |> unlines
+                        substr (fmStart + 1) fmEnd postFileLines |> unlines
                 liftIO $ print frontmatter
                 return ("tag", postFile)
         liftIO $ print tags_paths
