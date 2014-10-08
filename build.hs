@@ -20,17 +20,28 @@ main = shakeArgs shakeOptions $ do
         postFiles <- getDirectoryFiles "" ["_posts/*.md"]
 
         -- read tags
-        tags :: [(Tag, FilePath)] <- do
+        tags_paths :: [(Tag, FilePath)] <- do
             forM postFiles $ \postFile -> do
                 postFileLines <- readFileLines postFile
                 let frontmatterStart:frontmatterEnd:_ =
                         elemIndices "---" postFileLines
-                liftIO $ print (frontmatterStart, frontmatterEnd)
+                    frontmatter =
+                        substr (frontmatterStart + 1) frontmatterEnd
+                            postFileLines
+                        |> unlines
+                liftIO $ print frontmatter
                 return ("tag", postFile)
-        liftIO $ print tags
+        liftIO $ print tags_paths
 
         -- TODO: write tag list
         -- TODO: write every tag file
 
+  where
+    substr start end = drop start . take end
+
 
 type Tag = String
+
+
+(|>) :: a -> (a -> b) -> b
+x |> f = f x
