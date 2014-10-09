@@ -2,7 +2,7 @@
 layout: post
 title:  Свежие темы курсовых работ
 date:   2014-09-14 23:32
-tags:   programming, teaching
+tags:   [programming, teaching]
 ---
 
 Освежил список курсовых работ для лицеистов:

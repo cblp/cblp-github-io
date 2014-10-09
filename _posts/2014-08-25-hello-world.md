@@ -2,7 +2,7 @@
 layout: post
 title:  Hello world!
 date:   2014-08-25 11:20
-tags:   blog
+tags:   [blog]
 ---
 
 Я решил снова вести бложик.
