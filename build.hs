@@ -64,14 +64,14 @@ readFrontmatter file = do
     let fileLines = ByteString.lines contents
         fmStart:fmEnd:_ = elemIndices documentStart fileLines
         Just (frontmatter :: Frontmatter) =
-            substr (fmStart + 1) fmEnd fileLines
+            sublist (fmStart + 1) fmEnd fileLines
             |> ByteString.unlines
             |> Yaml.decode
     return frontmatter
 
   where
     documentStart = ByteString.pack "---"
-    substr start end = drop start . take end
+    sublist start end = drop start . take end
 
 
 -- TH should be at the end of file
