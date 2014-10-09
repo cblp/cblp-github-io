@@ -9,6 +9,8 @@ import Data.Aeson.TH (defaultOptions, deriveFromJSON, fieldLabelModifier)
 import Data.ByteString as ByteString (readFile)
 import Data.ByteString.Char8 as ByteString (lines, pack, unlines)
 import Data.List (elemIndices)
+import Data.Map (Map)
+import Data.Map as Map (empty, insertWith)
 import Data.Text (Text)
 import Data.Yaml as Yaml (decode)
 import Development.Shake
@@ -26,12 +28,16 @@ main = shakeArgs shakeOptions $ do
         postFiles <- getDirectoryFiles "" ["_posts/*.md"]
 
         -- read tags
-        tags_paths :: [(Tag, FilePath)] <- do
+        tags_path_map :: [(Tag, FilePath)] <-
             concatM postFiles $ \postFile -> do
                 tags <- liftIO $ readTags postFile
                 return [(tag, postFile) | tag <- tags]
 
-        liftIO $ print tags_paths
+        let tag_paths_map :: Map Tag [FilePath] =
+                tags_path_map
+                |> foldr (\(tag, file) -> insertWith (++) tag [file]) Map.empty
+
+        liftIO $ print tag_paths_map
 
         -- TODO: write tag list
         -- TODO: write every tag file
