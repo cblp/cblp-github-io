@@ -3,13 +3,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
+import Control.Applicative ((<$>))
 import Control.Monad (forM)
 import Data.Aeson.TH (defaultOptions, deriveFromJSON, fieldLabelModifier)
 import Data.ByteString as ByteString (readFile)
 import Data.ByteString.Char8 as ByteString (lines, pack, unlines)
 import Data.List (elemIndices)
 import Data.Text (Text)
-import Data.Text as Text (pack)
 import Data.Yaml as Yaml (decode)
 import Development.Shake
 
@@ -27,30 +27,14 @@ main = shakeArgs shakeOptions $ do
 
         -- read tags
         tags_paths :: [(Tag, FilePath)] <- do
-            forM postFiles $ \postFile -> do
-                frontmatter <- liftIO $ readFrontmatter postFile
-                liftIO $ print frontmatter
-                return (Text.pack "tag", postFile)
+            concatM postFiles $ \postFile -> do
+                tags <- liftIO $ readTags postFile
+                return [(tag, postFile) | tag <- tags]
+
         liftIO $ print tags_paths
 
         -- TODO: write tag list
         -- TODO: write every tag file
-
-  where
-    readFrontmatter :: FilePath -> IO Frontmatter
-    readFrontmatter file = do
-        contents <- ByteString.readFile file
-        let fileLines = ByteString.lines contents
-            fmStart:fmEnd:_ = elemIndices documentStart fileLines
-            Just (frontmatter :: Frontmatter) =
-                substr (fmStart + 1) fmEnd fileLines
-                |> ByteString.unlines
-                |> Yaml.decode
-        return frontmatter
-
-      where
-        documentStart = ByteString.pack "---"
-        substr start end = drop start . take end
 
 
 type Tag = Text
@@ -60,8 +44,35 @@ type Tag = Text
 x |> f = f x
 
 
+concatM :: (Monad m, Functor m) => [a] -> (a -> m [b]) -> m [b]
+concatM xs f = concat <$> forM xs f
+
+
 data Frontmatter = Frontmatter
     { fm_tags :: [Tag]
     }
         deriving Show
+
+
+readTags :: FilePath -> IO [Tag]
+readTags file = fm_tags <$> readFrontmatter file
+
+
+readFrontmatter :: FilePath -> IO Frontmatter
+readFrontmatter file = do
+    contents <- ByteString.readFile file
+    let fileLines = ByteString.lines contents
+        fmStart:fmEnd:_ = elemIndices documentStart fileLines
+        Just (frontmatter :: Frontmatter) =
+            substr (fmStart + 1) fmEnd fileLines
+            |> ByteString.unlines
+            |> Yaml.decode
+    return frontmatter
+
+  where
+    documentStart = ByteString.pack "---"
+    substr start end = drop start . take end
+
+
+-- TH should be at the end of file
 deriveFromJSON defaultOptions{fieldLabelModifier = drop 3} ''Frontmatter
