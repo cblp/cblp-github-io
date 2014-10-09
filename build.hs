@@ -28,13 +28,7 @@ main = shakeArgs shakeOptions $ do
         -- read tags
         tags_paths :: [(Tag, FilePath)] <- do
             forM postFiles $ \postFile -> do
-                postFileContent <- liftIO $ ByteString.readFile postFile
-                let postFileLines = ByteString.lines postFileContent
-                    fmStart:fmEnd:_ = elemIndices documentStart postFileLines
-                    Just (frontmatter :: Frontmatter) =
-                        substr (fmStart + 1) fmEnd postFileLines
-                        |> ByteString.unlines
-                        |> Yaml.decode
+                frontmatter <- liftIO $ readFrontmatter postFile
                 liftIO $ print frontmatter
                 return (Text.pack "tag", postFile)
         liftIO $ print tags_paths
@@ -43,8 +37,20 @@ main = shakeArgs shakeOptions $ do
         -- TODO: write every tag file
 
   where
-    documentStart = ByteString.pack "---"
-    substr start end = drop start . take end
+    readFrontmatter :: FilePath -> IO Frontmatter
+    readFrontmatter file = do
+        contents <- ByteString.readFile file
+        let fileLines = ByteString.lines contents
+            fmStart:fmEnd:_ = elemIndices documentStart fileLines
+            Just (frontmatter :: Frontmatter) =
+                substr (fmStart + 1) fmEnd fileLines
+                |> ByteString.unlines
+                |> Yaml.decode
+        return frontmatter
+
+      where
+        documentStart = ByteString.pack "---"
+        substr start end = drop start . take end
 
 
 type Tag = Text
