@@ -4,6 +4,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 import Control.Applicative ((<$>))
+import Control.Arrow ((>>>))
 import Control.Monad (forM)
 import Data.Aeson.TH (defaultOptions, deriveFromJSON, fieldLabelModifier)
 import Data.ByteString as ByteString (readFile)
@@ -28,30 +29,30 @@ main = shakeArgs shakeOptions $ do
         postFiles <- getDirectoryFiles "" ["_posts/*.md"]
 
         -- read tags
-        tags_path_map :: [(Tag, FilePath)] <-
-            concatM postFiles $ \postFile -> do
-                tags <- liftIO $ readTags postFile
-                return [(tag, postFile) | tag <- tags]
+        tagPaths :: Map Tag [FilePath] <-
+            let readTagsWithFilenames postFile = do
+                    tags <- liftIO $ readTags postFile
+                    return [(tag, postFile) | tag <- tags]
+            in  forM postFiles readTagsWithFilenames
+                $> concat
+                $> mapFromListCollectingValues
 
-        let tag_paths_map :: Map Tag [FilePath] =
-                tags_path_map
-                |> foldr (\(tag, file) -> insertWith (++) tag [file]) Map.empty
-
-        liftIO $ print tag_paths_map
+        liftIO $ print tagPaths
 
         -- TODO: write tag list
         -- TODO: write every tag file
 
 
-type Tag = Text
+type Tag = Text -- TODO: String?
 
 
 (|>) :: a -> (a -> b) -> b
 x |> f = f x
 
 
-concatM :: (Monad m, Functor m) => [a] -> (a -> m [b]) -> m [b]
-concatM xs f = concat <$> forM xs f
+($>) :: Functor f => f a -> (a -> b) -> f b
+($>) = flip fmap
+infixl 4 $>
 
 
 data Frontmatter = Frontmatter
@@ -78,6 +79,11 @@ readFrontmatter file = do
   where
     documentStart = ByteString.pack "---"
     sublist start end = drop start . take end
+
+
+mapFromListCollectingValues :: Ord k => [(k, v)] -> Map k [v]
+mapFromListCollectingValues =
+    foldr (\(k, v) -> insertWith (++) k [v]) empty
 
 
 -- TH should be at the end of file
