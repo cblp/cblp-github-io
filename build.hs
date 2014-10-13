@@ -3,17 +3,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-import Control.Applicative ((<$>))
-import Control.Arrow ((>>>))
-import Control.Monad (forM)
 import Data.Aeson.TH (defaultOptions, deriveFromJSON, fieldLabelModifier)
-import Data.ByteString as ByteString (readFile)
+import Data.ByteString (ByteString)
+import Data.ByteString as ByteString (putStr, readFile)
 import Data.ByteString.Char8 as ByteString (lines, pack, unlines)
 import Data.List (elemIndices)
 import Data.Map (Map)
 import Data.Map as Map (empty, insertWith)
 import Data.Text (Text)
-import Data.Yaml as Yaml (decode)
+import Data.Yaml as Yaml (decode, encode)
 import Development.Shake
 
 
@@ -29,15 +27,15 @@ main = shakeArgs shakeOptions $ do
         postFiles <- getDirectoryFiles "" ["_posts/*.md"]
 
         -- read tags
-        tagPaths :: Map Tag [FilePath] <-
-            let readTagsWithFilenames postFile = do
-                    tags <- liftIO $ readTags postFile
-                    return [(tag, postFile) | tag <- tags]
-            in  forM postFiles readTagsWithFilenames
-                $> concat
-                $> mapFromListCollectingValues
+        postFilesContents <- liftIO $ mapM ByteString.readFile postFiles
+        let tagPaths = mapFromListCollectingValues
+                [ (tag, postFile)
+                | (tags, postFile) <- zip (map readTags postFilesContents)
+                                          postFiles
+                , tag <- tags
+                ]
 
-        liftIO $ print tagPaths
+        liftIO $ ByteString.putStr $ Yaml.encode tagPaths
 
         -- TODO: write tag list
         -- TODO: write every tag file
@@ -50,31 +48,24 @@ type Tag = Text -- TODO: String?
 x |> f = f x
 
 
-($>) :: Functor f => f a -> (a -> b) -> f b
-($>) = flip fmap
-infixl 4 $>
-
-
 data Frontmatter = Frontmatter
     { fm_tags :: [Tag]
     }
         deriving Show
 
 
-readTags :: FilePath -> IO [Tag]
-readTags file = fm_tags <$> readFrontmatter file
+readTags :: ByteString -> [Tag]
+readTags = fm_tags . readFrontmatter
 
 
-readFrontmatter :: FilePath -> IO Frontmatter
-readFrontmatter file = do
-    contents <- ByteString.readFile file
-    let fileLines = ByteString.lines contents
+readFrontmatter :: ByteString -> Frontmatter
+readFrontmatter fileContents =
+    let fileLines = ByteString.lines fileContents
         fmStart:fmEnd:_ = elemIndices documentStart fileLines
-        Just (frontmatter :: Frontmatter) =
-            sublist (fmStart + 1) fmEnd fileLines
-            |> ByteString.unlines
-            |> Yaml.decode
-    return frontmatter
+        Just frontmatter = sublist (fmStart + 1) fmEnd fileLines
+                           |> ByteString.unlines
+                           |> Yaml.decode
+    in  frontmatter
 
   where
     documentStart = ByteString.pack "---"
