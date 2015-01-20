@@ -1,7 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
+                    , FeedConfiguration(..)
                     , applyAsTemplate
                     , constField
                     , dateField
@@ -15,10 +16,12 @@ import Hakyll       ( Context
                     , pandocCompiler
                     , recentFirst
                     , relativizeUrls
+                    , renderRss
                     )
 
 import Local.Hakyll ( cacheTemplates
                     , compileFiles
+                    , compileFilesHtml
                     , compressCss
                     , copyFiles
                     , createFile
@@ -27,16 +30,16 @@ import Local.Hakyll ( cacheTemplates
 
 main :: IO ()
 main = hakyll $ do
-    copyFiles       "images/*"
-    compressCss     "css/*"
+    copyFiles "images/*"
+    compressCss "css/*"
 
-    compileFiles    "posts/*" $
+    compileFilesHtml "posts/*" $
         pandocCompiler
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
 
-    createFile      "archive.html" $ do
+    createFile "archive.html" $ do
         posts <- recentFirst =<< loadAll "posts/*"
         let archiveCtx =
                 listField "posts" postCtx (return posts) <>
@@ -48,7 +51,18 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/default.html" archiveCtx
             >>= relativizeUrls
 
-    compileFiles    "index.html" $ do
+    createFile "feed.xml" $ do
+        posts <- recentFirst =<< loadAll "posts/*"
+        let feedCtx         = constField "description" "" <>
+                              defaultContext
+            feedAuthorName  = "Yuriy Syrovetskiy"
+            feedAuthorEmail = "cblp@cblp.su"
+            feedTitle       = feedAuthorName
+            feedDescription = feedAuthorName ++ "'s blog"
+            feedRoot        = "http://cblp.github.io"
+        renderRss FeedConfiguration{..} feedCtx posts
+
+    compileFiles "index.html" $ do
         posts <- recentFirst =<< loadAll "posts/*"
         let indexCtx =
                 listField "posts" postCtx (return posts) <>
@@ -67,7 +81,7 @@ main = hakyll $ do
     --        >>= loadAndApplyTemplate "templates/default.html" defaultContext
     --        >>= relativizeUrls
 
-    cacheTemplates  "templates/*"
+    cacheTemplates "templates/*"
 
 
 postCtx :: Context String
