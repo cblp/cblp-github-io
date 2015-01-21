@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
+import Data.Map as Map
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
@@ -7,13 +8,19 @@ import Hakyll       ( Context
                     , constField
                     , dateField
                     , defaultContext
+                    , field
+                    , getMetadata
                     , getResourceBody
                     , hakyll
+                    , itemBody
+                    , itemIdentifier
                     , listField
                     , loadAll
+                    , loadAllSnapshots
                     , loadAndApplyTemplate
                     , makeItem
                     , pandocCompiler
+                    , saveSnapshot
                     , recentFirst
                     , relativizeUrls
                     , renderRss
@@ -30,7 +37,8 @@ import Local.Hakyll ( cacheTemplates
 
 main :: IO ()
 main = hakyll $ do
-    let loadPosts = recentFirst =<< loadAll "posts/*"
+    let loadPosts        = recentFirst =<< loadAll          "posts/*"
+        loadPostsContent = recentFirst =<< loadAllSnapshots "posts/*" "content"
 
     copyFiles "images/*"
     compressCss "css/*"
@@ -38,6 +46,7 @@ main = hakyll $ do
     compileFilesHtml "posts/*" $
         pandocCompiler
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
+            >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
 
@@ -54,8 +63,8 @@ main = hakyll $ do
             >>= relativizeUrls
 
     createFile "feed.xml" $ do
-        posts <- loadPosts
-        let feedCtx         = constField "description" "" <>
+        posts <- loadPostsContent
+        let feedCtx         = descriptionAutoField <>
                               defaultContext
             feedAuthorName  = "Yuriy Syrovetskiy"
             feedAuthorEmail = "cblp@cblp.su"
@@ -90,3 +99,11 @@ postCtx :: Context String
 postCtx =
     dateField "date" "%Y-%m-%d" <>
     defaultContext
+
+
+descriptionAutoField :: Context String
+descriptionAutoField = field "description" $ \item -> do
+    metadata <- getMetadata (itemIdentifier item)
+    return $ case Map.lookup "description" metadata of
+        Just description    -> description
+        Nothing             -> itemBody item
