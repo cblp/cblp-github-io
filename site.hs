@@ -30,6 +30,8 @@ import Local.Hakyll ( cacheTemplates
 
 main :: IO ()
 main = hakyll $ do
+    let loadPosts = recentFirst =<< loadAll "posts/*"
+
     copyFiles "images/*"
     compressCss "css/*"
 
@@ -40,7 +42,7 @@ main = hakyll $ do
             >>= relativizeUrls
 
     createFile "archive.html" $ do
-        posts <- recentFirst =<< loadAll "posts/*"
+        posts <- loadPosts
         let archiveCtx =
                 listField "posts" postCtx (return posts) <>
                 constField "title" "Archive"             <>
@@ -52,7 +54,7 @@ main = hakyll $ do
             >>= relativizeUrls
 
     createFile "feed.xml" $ do
-        posts <- recentFirst =<< loadAll "posts/*"
+        posts <- loadPosts
         let feedCtx         = constField "description" "" <>
                               defaultContext
             feedAuthorName  = "Yuriy Syrovetskiy"
@@ -63,7 +65,7 @@ main = hakyll $ do
         renderRss FeedConfiguration{..} feedCtx posts
 
     compileFiles "index.html" $ do
-        posts <- recentFirst =<< loadAll "posts/*"
+        posts <- loadPosts
         let indexCtx =
                 listField "posts" postCtx (return posts) <>
                 constField "title" "Recent posts"        <>
