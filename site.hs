@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
-import Data.Map as Map
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
@@ -9,7 +8,7 @@ import Hakyll       ( Context
                     , dateField
                     , defaultContext
                     , field
-                    , getMetadata
+                    , getMetadataField
                     , getResourceBody
                     , hakyll
                     , itemBody
@@ -103,7 +102,7 @@ postCtx =
 
 descriptionAutoField :: Context String
 descriptionAutoField = field "description" $ \item -> do
-    metadata <- getMetadata (itemIdentifier item)
-    return $ case Map.lookup "description" metadata of
+    mdescription <- getMetadataField (itemIdentifier item) "description"
+    return $ case mdescription of
         Just description    -> description
-        Nothing             -> itemBody item
+        Nothing             -> itemBody item ++ "..."
