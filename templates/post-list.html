@@ -1,10 +1,13 @@
-<dl>
+<table class="postList">
     $for(posts)$
-        <dt>
-            $date$ -> <a href="$url$">$title$</a>
-        </dt>
-        <dd>
-            $description$
-        </dd>
+        <tr>
+            <td>
+                $date$
+            </td>
+            <td>
+                <h2><a href="$url$">$title$</a></h2>
+                $description$
+            </td>
+        </tr>
     $endfor$
-</dl>
+</table>
