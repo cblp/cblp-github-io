@@ -14,7 +14,6 @@ import Hakyll       ( Context
                     , itemBody
                     , itemIdentifier
                     , listField
-                    , loadAll
                     , loadAllSnapshots
                     , loadAndApplyTemplate
                     , makeItem
@@ -36,8 +35,7 @@ import Local.Hakyll ( cacheTemplates
 
 main :: IO ()
 main = hakyll $ do
-    let loadPosts        = recentFirst =<< loadAll          "posts/*"
-        loadPostsContent = recentFirst =<< loadAllSnapshots "posts/*" "content"
+    let loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
 
     copyFiles "images/*"
     compressCss "css/*"
@@ -50,7 +48,7 @@ main = hakyll $ do
             >>= relativizeUrls
 
     createFile "archive.html" $ do
-        posts <- loadPosts
+        posts <- loadPostsContent
         let archiveCtx =
                 listField "posts" postCtx (return posts) <>
                 constField "title" "Archive"             <>
@@ -73,7 +71,7 @@ main = hakyll $ do
         renderRss FeedConfiguration{..} feedCtx posts
 
     compileFiles "index.html" $ do
-        posts <- loadPosts
+        posts <- loadPostsContent
         let indexCtx =
                 listField "posts" postCtx (return posts) <>
                 defaultContext
@@ -94,9 +92,9 @@ main = hakyll $ do
 
 
 postCtx :: Context String
-postCtx =
-    dateField "date" "%Y-%m-%d" <>
-    defaultContext
+postCtx = dateField "date" "%Y-%m-%d"
+       <> descriptionAutoField
+       <> defaultContext
 
 
 descriptionAutoField :: Context String
