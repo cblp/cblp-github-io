@@ -104,4 +104,4 @@ descriptionAutoField = field "description" $ \item -> do
     mdescription <- getMetadataField (itemIdentifier item) "description"
     return $ case mdescription of
         Just description    -> description
-        Nothing             -> itemBody item ++ "..."
+        Nothing             -> itemBody item
