@@ -76,7 +76,6 @@ main = hakyll $ do
         posts <- loadPosts
         let indexCtx =
                 listField "posts" postCtx (return posts) <>
-                constField "title" "Recent posts"        <>
                 defaultContext
 
         getResourceBody
