@@ -58,7 +58,7 @@ main = hakyll $ do
                 defaultContext
 
         makeItem ""
-            >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+            >>= applyTemplate_archive                         archiveCtx
             >>= applyTemplate_page                            archiveCtx
 
     createFile "feed.xml" $ do
@@ -118,4 +118,10 @@ applyTemplate_page ctx item =
 applyTemplate_postPage :: Context String -> Item String -> Compiler (Item String)
 applyTemplate_postPage ctx item =
     loadAndApplyTemplate "templates/postPage.html" ctx item
+    >>= applyTemplate_page ctx
+
+
+applyTemplate_archive :: Context String -> Item String -> Compiler (Item String)
+applyTemplate_archive ctx item =
+    loadAndApplyTemplate "templates/archive.html" ctx item
     >>= applyTemplate_page ctx
