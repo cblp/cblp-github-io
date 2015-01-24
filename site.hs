@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
 import Data.Monoid  ( (<>) )
-import Hakyll       ( Context
+import Hakyll       ( Compiler
+                    , Context
                     , FeedConfiguration(..)
+                    , Item
                     , applyAsTemplate
                     , constField
                     , dateField
@@ -48,8 +50,7 @@ main = hakyll $ do
             >>= saveSnapshot "widget"
             >>= loadAndApplyTemplate "templates/postPage.html"      postCtx
             >>= loadAndApplyTemplate "templates/page.html"          postCtx
-            >>= loadAndApplyTemplate "templates/default.html"       postCtx
-            >>= relativizeUrls
+            >>= applyTemplate_default                               postCtx
 
     createFile "archive.html" $ do
         posts <- loadPostsWidgets
@@ -61,8 +62,7 @@ main = hakyll $ do
         makeItem ""
             >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
             >>= loadAndApplyTemplate "templates/page.html"    archiveCtx
-            >>= loadAndApplyTemplate "templates/default.html" archiveCtx
-            >>= relativizeUrls
+            >>= applyTemplate_default                         archiveCtx
 
     createFile "feed.xml" $ do
         posts <- loadPostsContent
@@ -84,13 +84,11 @@ main = hakyll $ do
         getResourceBody
             >>= applyAsTemplate indexCtx
             >>= loadAndApplyTemplate "templates/page.html"    indexCtx
-            >>= loadAndApplyTemplate "templates/default.html" indexCtx
-            >>= relativizeUrls
+            >>= applyTemplate_default                         indexCtx
 
     compileFiles "cv.html" $ do
         getResourceBody
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
-            >>= relativizeUrls
+            >>= applyTemplate_default defaultContext
 
     cacheTemplates "templates/*"
 
@@ -107,3 +105,9 @@ descriptionAutoField = field "description" $ \item -> do
     return $ case mdescription of
         Just description    -> description
         Nothing             -> itemBody item
+
+
+applyTemplate_default :: Context a -> Item a -> Compiler (Item String)
+applyTemplate_default ctx item =
+    loadAndApplyTemplate "templates/default.html" ctx item
+    >>= relativizeUrls
