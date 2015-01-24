@@ -46,7 +46,7 @@ main = hakyll $ do
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
             >>= saveSnapshot "widget"
-            >>= loadAndApplyTemplate "templates/post.html"          postCtx
+            >>= loadAndApplyTemplate "templates/postPage.html"          postCtx
             >>= loadAndApplyTemplate "templates/default.html"       postCtx
             >>= relativizeUrls
 
