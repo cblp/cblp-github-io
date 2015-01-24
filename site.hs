@@ -44,47 +44,42 @@ main = hakyll $ do
     compressCss "css/*"
 
     compileFilesHtml "posts/*" $
-        pandocCompiler
-            >>= saveSnapshot "content"
-            >>= applyTemplate_postWidget                            postCtx
-            >>= saveSnapshot "widget"
-            >>= applyTemplate_postPage                              postCtx
+        pandocCompiler  >>= saveSnapshot "content"
+                        >>= applyTemplate_postWidget    postCtx
+                        >>= saveSnapshot "widget"
+                        >>= applyTemplate_postPage      postCtx
 
     createFile "archive.html" $ do
         posts <- loadPostsWidgets
-        let archiveCtx =
-                listField "posts" postCtx (return posts) <>
-                constField "title" "Archive"             <>
-                defaultContext
+        let archiveCtx =   listField "posts" postCtx (return posts)
+                        <> constField "title" "Archive"
+                        <> defaultContext
 
-        makeItem ""
-            >>= applyTemplate_archive                         archiveCtx
-            >>= applyTemplate_page                            archiveCtx
+        makeItem "" >>= applyTemplate_archive   archiveCtx
+                    >>= applyTemplate_page      archiveCtx
 
     createFile "feed.xml" $ do
         posts <- loadPostsContent
-        let feedCtx         = descriptionAutoField <>
-                              defaultContext
+        let feedCtx         =  descriptionAutoField
+                            <> defaultContext
             feedAuthorName  = "Yuriy Syrovetskiy"
             feedAuthorEmail = "cblp@cblp.su"
             feedTitle       = feedAuthorName
             feedDescription = feedAuthorName ++ "'s blog"
             feedRoot        = "http://cblp.github.io"
+
         renderRss FeedConfiguration{..} feedCtx posts
 
     compileFiles "index.html" $ do
         posts <- loadPostsWidgets
-        let indexCtx =
-                listField "posts" postCtx (return posts) <>
-                defaultContext
+        let indexCtx = listField "posts" postCtx (return posts)
+                    <> defaultContext
 
-        getResourceBody
-            >>= applyAsTemplate indexCtx
-            >>= applyTemplate_page  indexCtx
+        getResourceBody >>= applyAsTemplate     indexCtx
+                        >>= applyTemplate_page  indexCtx
 
-    compileFiles "cv.html" $ do
-        getResourceBody
-            >>= applyTemplate_default defaultContext
+    compileFiles "cv.html" $
+        getResourceBody >>= applyTemplate_default defaultContext
 
     cacheTemplates "templates/*"
 
