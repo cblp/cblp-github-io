@@ -3,13 +3,14 @@ module Templates    ( Template(..)
                     )
 where
 
-import Hakyll   ( Compiler
-                , Context
-                , Identifier
-                , Item
-                , loadAndApplyTemplate
-                , relativizeUrls
-                )
+import Hakyll       ( Compiler
+                    , Context
+                    , Identifier
+                    , Item
+                    , fromFilePath
+                    , loadAndApplyTemplate
+                    , relativizeUrls
+                    )
 
 
 type HakyllTemplater = Context String -> Item String -> Compiler (Item String)
@@ -20,14 +21,11 @@ data Template   = Archive
                 | Page
                 | PostPage
                 | PostWidget
+    deriving (Show)
 
 
 templateFile :: Template -> Identifier
-templateFile Archive    = "templates/archive.html"
-templateFile Default    = "templates/default.html"
-templateFile Page       = "templates/page.html"
-templateFile PostPage   = "templates/postPage.html"
-templateFile PostWidget = "templates/postWidget.html"
+templateFile t = fromFilePath $ "templates/" ++ show t ++ ".html"
 
 
 applyTemplate ::
