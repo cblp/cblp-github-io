@@ -29,11 +29,8 @@ import Local.Hakyll ( cacheTemplates
                     , copyFiles
                     , createFile
                     )
-import Templates    ( applyTemplate_archive
-                    , applyTemplate_default
-                    , applyTemplate_page
-                    , applyTemplate_postPage
-                    , applyTemplate_postWidget
+import Templates    ( Template(..)
+                    , applyTemplate
                     )
 
 
@@ -47,9 +44,9 @@ main = hakyll $ do
 
     compileFilesHtml "posts/*" $
         pandocCompiler  >>= saveSnapshot "content"
-                        >>= applyTemplate_postWidget    postCtx
+                        >>= applyTemplate PostWidget    postCtx
                         >>= saveSnapshot "widget"
-                        >>= applyTemplate_postPage      postCtx
+                        >>= applyTemplate PostPage      postCtx
 
     createFile "archive.html" $ do
         posts <- loadPostsWidgets
@@ -57,8 +54,8 @@ main = hakyll $ do
                         <> constField "title" "Archive"
                         <> defaultContext
 
-        makeItem "" >>= applyTemplate_archive   archiveCtx
-                    >>= applyTemplate_page      archiveCtx
+        makeItem "" >>= applyTemplate Archive   archiveCtx
+                    >>= applyTemplate Page      archiveCtx
 
     createFile "feed.xml" $ do
         posts <- loadPostsContent
@@ -78,10 +75,10 @@ main = hakyll $ do
                     <> defaultContext
 
         getResourceBody >>= applyAsTemplate     indexCtx
-                        >>= applyTemplate_page  indexCtx
+                        >>= applyTemplate Page  indexCtx
 
     compileFiles "cv.html" $
-        getResourceBody >>= applyTemplate_default defaultContext
+        getResourceBody >>= applyTemplate Default defaultContext
 
     cacheTemplates "templates/*"
 

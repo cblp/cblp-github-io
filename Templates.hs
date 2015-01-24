@@ -1,36 +1,49 @@
-module Templates where
+module Templates    ( Template(..)
+                    , applyTemplate
+                    )
+where
 
 import Hakyll   ( Compiler
                 , Context
+                , Identifier
                 , Item
                 , loadAndApplyTemplate
                 , relativizeUrls
                 )
 
 
-applyTemplate_default :: Context a -> Item a -> Compiler (Item String)
-applyTemplate_default ctx item =
-    loadAndApplyTemplate "templates/default.html" ctx item
-    >>= relativizeUrls
+type HakyllTemplater = Context String -> Item String -> Compiler (Item String)
 
 
-applyTemplate_page :: Context String -> Item String -> Compiler (Item String)
-applyTemplate_page ctx item =
-    loadAndApplyTemplate "templates/page.html" ctx item
-    >>= applyTemplate_default ctx
+data Template   = Archive
+                | Default
+                | Page
+                | PostPage
+                | PostWidget
 
 
-applyTemplate_postPage :: Context String -> Item String -> Compiler (Item String)
-applyTemplate_postPage ctx item =
-    loadAndApplyTemplate "templates/postPage.html" ctx item
-    >>= applyTemplate_page ctx
+templateFile :: Template -> Identifier
+templateFile Archive    = "templates/archive.html"
+templateFile Default    = "templates/default.html"
+templateFile Page       = "templates/page.html"
+templateFile PostPage   = "templates/postPage.html"
+templateFile PostWidget = "templates/postWidget.html"
 
 
-applyTemplate_archive :: Context String -> Item String -> Compiler (Item String)
-applyTemplate_archive ctx item =
-    loadAndApplyTemplate "templates/archive.html" ctx item
-    >>= applyTemplate_page ctx
+applyTemplate ::
+    Template -> Context String -> Item String -> Compiler (Item String)
+applyTemplate Default       = \ctx item ->  templateBody Default ctx item
+                                            >>= relativizeUrls
+applyTemplate Page          = inherit Default   Page
+applyTemplate PostPage      = inherit Page      PostPage
+applyTemplate Archive       = inherit Page      Archive
+applyTemplate PostWidget    = templateBody PostWidget
 
 
-applyTemplate_postWidget :: Context String -> Item String -> Compiler (Item String)
-applyTemplate_postWidget = loadAndApplyTemplate "templates/postWidget.html"
+inherit ::  Template -> Template -> HakyllTemplater
+inherit parent = \tpl ctx item ->   templateBody tpl ctx item
+                                    >>= applyTemplate parent ctx
+
+
+templateBody :: Template -> HakyllTemplater
+templateBody tpl = loadAndApplyTemplate $ templateFile tpl
