@@ -46,18 +46,23 @@ h2 {
     font-size: 20px;
 }
 
-div.info {
+.postInfo {
     color: #555;
     font-size: 14px;
     font-style: italic;
 }
 
-table.postList td {
+.postWidget td {
     vertical-align: top;
     padding-top:    1em;
     padding-bottom: 1em;
 }
 
-table.postList h2 {
+.postTitle {
     margin-top: 0;
+}
+
+.postPage .postTitle a {
+    text-decoration: none;
+    color: black;
 }

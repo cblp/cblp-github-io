@@ -36,6 +36,7 @@ import Local.Hakyll ( cacheTemplates
 main :: IO ()
 main = hakyll $ do
     let loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
+        loadPostsWidgets = loadAllSnapshots "posts/*" "widget"  >>= recentFirst
 
     copyFiles "images/*"
     compressCss "css/*"
@@ -43,12 +44,14 @@ main = hakyll $ do
     compileFilesHtml "posts/*" $
         pandocCompiler
             >>= saveSnapshot "content"
-            >>= loadAndApplyTemplate "templates/post.html"    postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
+            >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
+            >>= saveSnapshot "widget"
+            >>= loadAndApplyTemplate "templates/post.html"          postCtx
+            >>= loadAndApplyTemplate "templates/default.html"       postCtx
             >>= relativizeUrls
 
     createFile "archive.html" $ do
-        posts <- loadPostsContent
+        posts <- loadPostsWidgets
         let archiveCtx =
                 listField "posts" postCtx (return posts) <>
                 constField "title" "Archive"             <>
@@ -71,7 +74,7 @@ main = hakyll $ do
         renderRss FeedConfiguration{..} feedCtx posts
 
     compileFiles "index.html" $ do
-        posts <- loadPostsContent
+        posts <- loadPostsWidgets
         let indexCtx =
                 listField "posts" postCtx (return posts) <>
                 defaultContext
