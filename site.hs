@@ -49,8 +49,7 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
             >>= saveSnapshot "widget"
             >>= loadAndApplyTemplate "templates/postPage.html"      postCtx
-            >>= loadAndApplyTemplate "templates/page.html"          postCtx
-            >>= applyTemplate_default                               postCtx
+            >>= applyTemplate_page                                  postCtx
 
     createFile "archive.html" $ do
         posts <- loadPostsWidgets
@@ -61,8 +60,7 @@ main = hakyll $ do
 
         makeItem ""
             >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
-            >>= loadAndApplyTemplate "templates/page.html"    archiveCtx
-            >>= applyTemplate_default                         archiveCtx
+            >>= applyTemplate_page                            archiveCtx
 
     createFile "feed.xml" $ do
         posts <- loadPostsContent
@@ -83,8 +81,7 @@ main = hakyll $ do
 
         getResourceBody
             >>= applyAsTemplate indexCtx
-            >>= loadAndApplyTemplate "templates/page.html"    indexCtx
-            >>= applyTemplate_default                         indexCtx
+            >>= applyTemplate_page  indexCtx
 
     compileFiles "cv.html" $ do
         getResourceBody
@@ -111,3 +108,9 @@ applyTemplate_default :: Context a -> Item a -> Compiler (Item String)
 applyTemplate_default ctx item =
     loadAndApplyTemplate "templates/default.html" ctx item
     >>= relativizeUrls
+
+
+applyTemplate_page :: Context String -> Item String -> Compiler (Item String)
+applyTemplate_page ctx item =
+    loadAndApplyTemplate "templates/page.html" ctx item
+    >>= applyTemplate_default ctx
