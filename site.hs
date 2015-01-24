@@ -84,12 +84,10 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/default.html" indexCtx
             >>= relativizeUrls
 
-    -- Static
-    --match "contact.md" $ do
-    --    route   $ setExtension "html"
-    --    compile $ pandocCompiler
-    --        >>= loadAndApplyTemplate "templates/default.html" defaultContext
-    --        >>= relativizeUrls
+    compileFiles "cv.html" $ do
+        getResourceBody
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
 
     cacheTemplates "templates/*"
 
