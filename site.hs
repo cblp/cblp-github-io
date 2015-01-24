@@ -46,7 +46,8 @@ main = hakyll $ do
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
             >>= saveSnapshot "widget"
-            >>= loadAndApplyTemplate "templates/postPage.html"          postCtx
+            >>= loadAndApplyTemplate "templates/postPage.html"      postCtx
+            >>= loadAndApplyTemplate "templates/page.html"          postCtx
             >>= loadAndApplyTemplate "templates/default.html"       postCtx
             >>= relativizeUrls
 
@@ -59,6 +60,7 @@ main = hakyll $ do
 
         makeItem ""
             >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+            >>= loadAndApplyTemplate "templates/page.html"    archiveCtx
             >>= loadAndApplyTemplate "templates/default.html" archiveCtx
             >>= relativizeUrls
 
@@ -81,6 +83,7 @@ main = hakyll $ do
 
         getResourceBody
             >>= applyAsTemplate indexCtx
+            >>= loadAndApplyTemplate "templates/page.html"    indexCtx
             >>= loadAndApplyTemplate "templates/default.html" indexCtx
             >>= relativizeUrls
 
