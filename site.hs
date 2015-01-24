@@ -46,7 +46,7 @@ main = hakyll $ do
     compileFilesHtml "posts/*" $
         pandocCompiler
             >>= saveSnapshot "content"
-            >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
+            >>= applyTemplate_postWidget                            postCtx
             >>= saveSnapshot "widget"
             >>= applyTemplate_postPage                              postCtx
 
@@ -125,3 +125,7 @@ applyTemplate_archive :: Context String -> Item String -> Compiler (Item String)
 applyTemplate_archive ctx item =
     loadAndApplyTemplate "templates/archive.html" ctx item
     >>= applyTemplate_page ctx
+
+
+applyTemplate_postWidget :: Context String -> Item String -> Compiler (Item String)
+applyTemplate_postWidget = loadAndApplyTemplate "templates/postWidget.html"
