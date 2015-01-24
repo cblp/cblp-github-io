@@ -48,8 +48,7 @@ main = hakyll $ do
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/postWidget.html"    postCtx
             >>= saveSnapshot "widget"
-            >>= loadAndApplyTemplate "templates/postPage.html"      postCtx
-            >>= applyTemplate_page                                  postCtx
+            >>= applyTemplate_postPage                              postCtx
 
     createFile "archive.html" $ do
         posts <- loadPostsWidgets
@@ -114,3 +113,9 @@ applyTemplate_page :: Context String -> Item String -> Compiler (Item String)
 applyTemplate_page ctx item =
     loadAndApplyTemplate "templates/page.html" ctx item
     >>= applyTemplate_default ctx
+
+
+applyTemplate_postPage :: Context String -> Item String -> Compiler (Item String)
+applyTemplate_postPage ctx item =
+    loadAndApplyTemplate "templates/postPage.html" ctx item
+    >>= applyTemplate_page ctx
