@@ -36,19 +36,31 @@ import Templates    ( Template(..)
 
 main :: IO ()
 main = hakyll $ do
-    let loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
-        loadPostsWidgets = loadAllSnapshots "posts/*" "widget"  >>= recentFirst
+    cacheTemplates      "templates/*"
 
-    copyFiles "images/*"
-    compressCss "css/*"
+    createFile          "archive.html"  archiveCompiler
+    compressCss         "css/*"
+    compileFiles        "cv.html"       cvCompiler
+    createFile          "feed.xml"      feedCompiler
+    compileFiles        "index.html"    indexCompiler
+    copyFiles           "images/*"
+    compileFilesHtml    "posts/*"       postsCompiler
 
-    compileFilesHtml "posts/*" $
-        pandocCompiler  >>= saveSnapshot "content"
-                        >>= applyTemplate PostWidget    postCtx
-                        >>= saveSnapshot "widget"
-                        >>= applyTemplate PostPage      postCtx
+    where
 
-    createFile "archive.html" $ do
+    postCtx = dateField "date" "%Y-%m-%d"
+           <> descriptionAutoField
+           <> defaultContext
+
+    loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
+    loadPostsWidgets = loadAllSnapshots "posts/*" "widget"  >>= recentFirst
+
+    postsCompiler = pandocCompiler  >>= saveSnapshot "content"
+                                    >>= applyTemplate PostWidget    postCtx
+                                    >>= saveSnapshot "widget"
+                                    >>= applyTemplate PostPage      postCtx
+
+    archiveCompiler = do
         posts <- loadPostsWidgets
         let archiveCtx =   listField "posts" postCtx (return posts)
                         <> constField "title" "Archive"
@@ -57,7 +69,7 @@ main = hakyll $ do
         makeItem "" >>= applyTemplate Archive   archiveCtx
                     >>= applyTemplate Page      archiveCtx
 
-    createFile "feed.xml" $ do
+    feedCompiler = do
         posts <- loadPostsContent
         let feedCtx         =  descriptionAutoField
                             <> defaultContext
@@ -69,7 +81,7 @@ main = hakyll $ do
 
         renderRss FeedConfiguration{..} feedCtx posts
 
-    compileFiles "index.html" $ do
+    indexCompiler = do
         posts <- loadPostsWidgets
         let indexCtx = listField "posts" postCtx (return posts)
                     <> defaultContext
@@ -77,16 +89,7 @@ main = hakyll $ do
         getResourceBody >>= applyAsTemplate     indexCtx
                         >>= applyTemplate Page  indexCtx
 
-    compileFiles "cv.html" $
-        getResourceBody >>= applyTemplate Default defaultContext
-
-    cacheTemplates "templates/*"
-
-
-postCtx :: Context String
-postCtx = dateField "date" "%Y-%m-%d"
-       <> descriptionAutoField
-       <> defaultContext
+    cvCompiler = getResourceBody >>= applyTemplate Default defaultContext
 
 
 descriptionAutoField :: Context String
