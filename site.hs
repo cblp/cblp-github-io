@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
+import Data.Maybe   ( fromMaybe )
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
@@ -95,6 +96,4 @@ main = hakyll $ do
 descriptionAutoField :: Context String
 descriptionAutoField = field "description" $ \item -> do
     mdescription <- getMetadataField (itemIdentifier item) "description"
-    return $ case mdescription of
-        Just description    -> description
-        Nothing             -> itemBody item
+    return $ fromMaybe (itemBody item) mdescription
