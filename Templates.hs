@@ -3,14 +3,15 @@ module Templates    ( Template(..)
                     )
 where
 
-import Hakyll       ( Compiler
-                    , Context
-                    , Identifier
-                    , Item
-                    , fromFilePath
-                    , loadAndApplyTemplate
-                    , relativizeUrls
-                    )
+import Control.Monad    ( (>=>) )
+import Hakyll           ( Compiler
+                        , Context
+                        , Identifier
+                        , Item
+                        , fromFilePath
+                        , loadAndApplyTemplate
+                        , relativizeUrls
+                        )
 
 
 type HakyllTemplater = Context String -> Item String -> Compiler (Item String)
@@ -30,17 +31,16 @@ templateFile t = fromFilePath $ "templates/" ++ show t ++ ".html"
 
 applyTemplate ::
     Template -> Context String -> Item String -> Compiler (Item String)
-applyTemplate Default       = \ctx item ->  templateBody Default ctx item
-                                            >>= relativizeUrls
+applyTemplate Default       = \ctx ->   templateBody Default ctx
+                                        >=> relativizeUrls
 applyTemplate Page          = inherit Default   Page
 applyTemplate PostPage      = inherit Page      PostPage
 applyTemplate Archive       = inherit Page      Archive
 applyTemplate PostWidget    = templateBody PostWidget
 
 
-inherit ::  Template -> Template -> HakyllTemplater
-inherit parent = \tpl ctx item ->   templateBody tpl ctx item
-                                    >>= applyTemplate parent ctx
+inherit :: Template -> Template -> HakyllTemplater
+inherit parent tpl ctx = templateBody tpl ctx >=> applyTemplate parent ctx
 
 
 templateBody :: Template -> HakyllTemplater
