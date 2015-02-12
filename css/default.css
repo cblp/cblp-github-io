@@ -13,19 +13,23 @@ a:visited {
 
 #header {
     background-color: #ddd;
-    padding: 1em 1em 1em 1em;
+    padding: 16pt;
     font-size: x-large;
 }
 
 #navigation {
     background-color: #eee;
-    padding: 1em 1em 1em 1em;
+    padding: 16pt;
     font-size: large;
 }
 
 #header     a,
 #navigation a {
     color: black;
+}
+
+#navigation a {
+    margin-right: 1em;
 }
 
 .postPage .postTitle a {
@@ -63,4 +67,5 @@ div#footer {
 
 #content {
     margin-top: 1em;
+    padding: 16pt;
 }
