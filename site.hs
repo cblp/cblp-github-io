@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
+import Data.Maybe   ( fromMaybe )
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
@@ -86,15 +87,15 @@ main = hakyll $ do
         let indexCtx = listField "posts" postCtx (return posts)
                     <> defaultContext
 
-        getResourceBody >>= applyAsTemplate     indexCtx
-                        >>= applyTemplate Page  indexCtx
+        getResourceBody >>= applyAsTemplate       indexCtx
+                        >>= applyTemplate Content indexCtx
+                        >>= applyTemplate Page    indexCtx
 
-    cvCompiler = getResourceBody >>= applyTemplate Default defaultContext
+    cvCompiler = getResourceBody  >>= applyTemplate Content defaultContext
+                                  >>= applyTemplate Default defaultContext
 
 
 descriptionAutoField :: Context String
 descriptionAutoField = field "description" $ \item -> do
     mdescription <- getMetadataField (itemIdentifier item) "description"
-    return $ case mdescription of
-        Just description    -> description
-        Nothing             -> itemBody item
+    return $ fromMaybe (itemBody item) mdescription
