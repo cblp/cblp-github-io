@@ -22,6 +22,7 @@ import Hakyll       ( Context
                     , saveSnapshot
                     , recentFirst
                     , renderRss
+                    , toFilePath
                     )
 
 import Local.Hakyll ( cacheTemplates
@@ -53,8 +54,9 @@ main = hakyll $ do
   where
 
     postCtx = dateField "date" "%Y-%m-%d"
-           <> descriptionAutoField
-           <> defaultContext
+          <>  descriptionAutoField
+          <>  postSourceUrlField
+          <>  defaultContext
 
     loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
     loadPostsWidgets = loadAllSnapshots "posts/*" "widget"  >>= recentFirst
@@ -103,3 +105,10 @@ descriptionAutoField = field "description" $
     \Item{itemIdentifier, itemBody} ->
         getMetadataField itemIdentifier "description"
         & fmap (fromMaybe itemBody)
+
+
+postSourceUrlField :: Context String
+postSourceUrlField = field "postSourceUrl" $
+    \Item{itemIdentifier} -> return $
+        "https://github.com/cblp/cblp.github.io/blob/source/"
+        <> toFilePath itemIdentifier

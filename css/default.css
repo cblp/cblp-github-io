@@ -69,3 +69,12 @@ div#footer {
     margin-top: 1em;
     padding: 16pt;
 }
+
+#postActions {
+    text-align: center;
+    margin-top: 2em;
+}
+
+#disqus_thread {
+    margin-top: 3em;
+}
