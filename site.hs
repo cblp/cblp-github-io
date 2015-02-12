@@ -1,9 +1,10 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
 
 import Data.Maybe   ( fromMaybe )
 import Data.Monoid  ( (<>) )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
+                    , Item(..)
                     , applyAsTemplate
                     , constField
                     , dateField
@@ -30,6 +31,7 @@ import Local.Hakyll ( cacheTemplates
                     , copyFiles
                     , createFile
                     )
+import Local.Prelude
 import Templates    ( Template(..)
                     , applyTemplate
                     )
@@ -48,7 +50,7 @@ main = hakyll $ do
     copyFiles           "images/*"
     compileFilesHtml    "posts/*"       postsCompiler
 
-    where
+  where
 
     postCtx = dateField "date" "%Y-%m-%d"
            <> descriptionAutoField
@@ -58,23 +60,23 @@ main = hakyll $ do
     loadPostsWidgets = loadAllSnapshots "posts/*" "widget"  >>= recentFirst
 
     postsCompiler = pandocCompiler  >>= saveSnapshot "content"
-                                    >>= applyTemplate PostWidget    postCtx
+                                    >>= applyTemplate PostWidget  postCtx
                                     >>= saveSnapshot "widget"
-                                    >>= applyTemplate PostPage      postCtx
+                                    >>= applyTemplate PostPage    postCtx
 
     archiveCompiler = do
         posts <- loadPostsWidgets
-        let archiveCtx =   listField "posts" postCtx (return posts)
-                        <> constField "title" "Archive"
-                        <> defaultContext
+        let archiveCtx = listField "posts" postCtx (return posts)
+                      <> constField "title" "Archive"
+                      <> defaultContext
 
-        makeItem "" >>= applyTemplate Archive   archiveCtx
-                    >>= applyTemplate Page      archiveCtx
+        makeItem "" >>= applyTemplate Archive archiveCtx
+                    >>= applyTemplate Page    archiveCtx
 
     feedCompiler = do
         posts <- loadPostsContent
-        let feedCtx         =  descriptionAutoField
-                            <> defaultContext
+        let feedCtx         = descriptionAutoField
+                          <>  defaultContext
             feedAuthorName  = "Yuriy Syrovetskiy"
             feedAuthorEmail = "cblp@cblp.su"
             feedTitle       = feedAuthorName
@@ -97,6 +99,7 @@ main = hakyll $ do
 
 
 descriptionAutoField :: Context String
-descriptionAutoField = field "description" $ \item -> do
-    mdescription <- getMetadataField (itemIdentifier item) "description"
-    return $ fromMaybe (itemBody item) mdescription
+descriptionAutoField = field "description" $
+    \Item{itemIdentifier, itemBody} ->
+        getMetadataField itemIdentifier "description"
+        & fmap (fromMaybe itemBody)

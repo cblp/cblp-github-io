@@ -13,6 +13,8 @@ import Hakyll         ( Compiler
                       , relativizeUrls
                       )
 
+import Local.Prelude
+
 
 type HakyllTemplater = Context String -> Item String -> Compiler (Item String)
 
@@ -41,13 +43,9 @@ applyTemplate PostWidget  = templateBody PostWidget
 
 
 wrap :: Template -> HakyllTemplater -> HakyllTemplater
-wrap parent = \tplr ctx ->  tplr ctx
-                            >=> applyTemplate parent ctx
+wrap parent = \tplr ctx ->  tplr                      ctx
+                            >=> applyTemplate parent  ctx
 
 
 templateBody :: Template -> HakyllTemplater
 templateBody tpl = loadAndApplyTemplate $ templateFile tpl
-
-
-(&) :: a -> (a -> b) -> b
-x & f = f x
