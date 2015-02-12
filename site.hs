@@ -42,6 +42,7 @@ main = hakyll $ do
     createFile          "archive.html"  archiveCompiler
     compressCss         "css/*"
     compileFiles        "cv.html"       cvCompiler
+    copyFiles           "favicon.ico"
     createFile          "feed.xml"      feedCompiler
     compileFiles        "index.html"    indexCompiler
     copyFiles           "images/*"
