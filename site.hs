@@ -87,10 +87,12 @@ main = hakyll $ do
         let indexCtx = listField "posts" postCtx (return posts)
                     <> defaultContext
 
-        getResourceBody >>= applyAsTemplate     indexCtx
-                        >>= applyTemplate Page  indexCtx
+        getResourceBody >>= applyAsTemplate       indexCtx
+                        >>= applyTemplate Content indexCtx
+                        >>= applyTemplate Page    indexCtx
 
-    cvCompiler = getResourceBody >>= applyTemplate Default defaultContext
+    cvCompiler = getResourceBody  >>= applyTemplate Content defaultContext
+                                  >>= applyTemplate Default defaultContext
 
 
 descriptionAutoField :: Context String

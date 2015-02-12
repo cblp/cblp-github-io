@@ -1,27 +1,28 @@
-module Templates    ( Template(..)
-                    , applyTemplate
-                    )
+module Templates  ( Template(..)
+                  , applyTemplate
+                  )
 where
 
-import Control.Monad    ( (>=>) )
-import Hakyll           ( Compiler
-                        , Context
-                        , Identifier
-                        , Item
-                        , fromFilePath
-                        , loadAndApplyTemplate
-                        , relativizeUrls
-                        )
+import Control.Monad  ( (>=>) )
+import Hakyll         ( Compiler
+                      , Context
+                      , Identifier
+                      , Item
+                      , fromFilePath
+                      , loadAndApplyTemplate
+                      , relativizeUrls
+                      )
 
 
 type HakyllTemplater = Context String -> Item String -> Compiler (Item String)
 
 
-data Template   = Archive
-                | Default
-                | Page
-                | PostPage
-                | PostWidget
+data Template = Archive
+              | Content
+              | Default
+              | Page
+              | PostPage
+              | PostWidget
     deriving (Show)
 
 
@@ -29,19 +30,24 @@ templateFile :: Template -> Identifier
 templateFile t = fromFilePath $ "templates/" ++ show t ++ ".html"
 
 
-applyTemplate ::
-    Template -> Context String -> Item String -> Compiler (Item String)
-applyTemplate Default       = \ctx ->   templateBody Default ctx
-                                        >=> relativizeUrls
-applyTemplate Page          = inherit Default   Page
-applyTemplate PostPage      = inherit Page      PostPage
-applyTemplate Archive       = inherit Page      Archive
-applyTemplate PostWidget    = templateBody PostWidget
+applyTemplate :: Template -> HakyllTemplater
+applyTemplate Archive     = templateBody Archive  & wrap Content & wrap Page
+applyTemplate Content     = templateBody Content
+applyTemplate Default     = \ctx -> templateBody Default ctx
+                                    >=> relativizeUrls
+applyTemplate Page        = templateBody Page     & wrap Default
+applyTemplate PostPage    = templateBody PostPage & wrap Content & wrap Page
+applyTemplate PostWidget  = templateBody PostWidget
 
 
-inherit :: Template -> Template -> HakyllTemplater
-inherit parent tpl ctx = templateBody tpl ctx >=> applyTemplate parent ctx
+wrap :: Template -> HakyllTemplater -> HakyllTemplater
+wrap parent = \tplr ctx ->  tplr ctx
+                            >=> applyTemplate parent ctx
 
 
 templateBody :: Template -> HakyllTemplater
 templateBody tpl = loadAndApplyTemplate $ templateFile tpl
+
+
+(&) :: a -> (a -> b) -> b
+x & f = f x

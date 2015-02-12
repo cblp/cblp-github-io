@@ -1,54 +1,53 @@
 body {
-    color: black;
-    font-size: 16px;
-    margin: 0px auto 0px auto;
-    width: 600px;
+    margin: 0 auto 0 auto;
+    max-width: 50em;
 }
 
-div#header {
-    border-bottom: 2px solid black;
-    margin-bottom: 30px;
-    padding: 12px 0px 12px 0px;
+a {
+    color: black;
 }
 
-div#logo a {
+a:visited {
+    color: #777;
+}
+
+#header {
+    background-color: #ddd;
+    padding: 1em 1em 1em 1em;
+    font-size: x-large;
+}
+
+#navigation {
+    background-color: #eee;
+    padding: 1em 1em 1em 1em;
+    font-size: large;
+}
+
+#header     a,
+#navigation a {
     color: black;
-    /*float: left;*/
-    font-size: 18px;
+}
+
+.postPage .postTitle a {
+    color: black;
+    text-decoration: none;
+}
+
+div#logo {
     font-weight: bold;
-}
-
-div#header #navigation {
-    text-align: right;
-}
-
-div#header #navigation a {
-    color: black;
-    font-size: 18px;
-    font-weight: bold;
-    margin-left: 12px;
 }
 
 div#footer {
-    border-top: solid 2px black;
+    border-top: solid 1px black;
     color: #555;
-    font-size: 12px;
-    margin-top: 30px;
-    padding: 12px 0px 12px 0px;
+    font-size: 12pt;
+    margin-top: 30pt;
+    padding: 12pt 0 12pt 0;
     text-align: right;
-}
-
-h1 {
-    font-size: 24px;
-}
-
-h2 {
-    font-size: 20px;
 }
 
 .postInfo {
     color: #555;
-    font-size: 14px;
     font-style: italic;
 }
 
@@ -62,7 +61,6 @@ h2 {
     margin-top: 0;
 }
 
-.postPage .postTitle a {
-    text-decoration: none;
-    color: black;
+#content {
+    margin-top: 1em;
 }
