@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Yuriy Syrovetskiy</title>
+        <link>http://cblp.github.io</link>
+        <description><![CDATA[Yuriy Syrovetskiy's blog]]></description>
+        <atom:link href="http://cblp.github.io/feed.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Sun, 14 Sep 2014 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Свежие темы курсовых работ</title>
+    <link>http://cblp.github.io/posts/2014-09-14-courseworks.html</link>
+    <description><![CDATA[<p>Освежил список курсовых работ для лицеистов: <a href="https://bitbucket.org/cblp/teaching/wiki/Courseworks">bitbucket.org/cblp/teaching/wiki/Courseworks</a></p>]]></description>
+    <pubDate>Sun, 14 Sep 2014 00:00:00 UT</pubDate>
+    <guid>http://cblp.github.io/posts/2014-09-14-courseworks.html</guid>
+</item>
+<item>
+    <title>Zebra puzzle</title>
+    <link>http://cblp.github.io/posts/2014-08-25-zebra.html</link>
+    <description><![CDATA[<p>I recently wrote a nice Haskell <strong><a href="https://bitbucket.org/cblp/teaching/src/default/examples/einstein/Einstein.hs">solution for the famous Zebra puzzle</a></strong> (a.k.a. Einstein’s puzzle) and posted it to the <a href="http://rosettacode.org/wiki/Zebra_puzzle#LP-like_version">Rosetta Code</a>.</p>]]></description>
+    <pubDate>Mon, 25 Aug 2014 00:00:00 UT</pubDate>
+    <guid>http://cblp.github.io/posts/2014-08-25-zebra.html</guid>
+</item>
+<item>
+    <title>Hello world!</title>
+    <link>http://cblp.github.io/posts/2014-08-25-hello-world.html</link>
+    <description><![CDATA[<p>Я решил снова вести бложик. Постараюсь делать это регулярно, как <a href="http://eax.me/blog-story/">Eax</a> или <a href="http://radiag.ru/post/73198008051">Radiag</a>.</p>]]></description>
+    <pubDate>Mon, 25 Aug 2014 00:00:00 UT</pubDate>
+    <guid>http://cblp.github.io/posts/2014-08-25-hello-world.html</guid>
+</item>
+
+    </channel> 
+</rss>
