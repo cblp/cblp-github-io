@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
 
 import Data.Maybe   ( fromMaybe )
-import Data.Monoid  ( (<>) )
+import Data.Monoid  ( (<>), mconcat )
 import Hakyll       ( Context
                     , FeedConfiguration(..)
                     , Item(..)
@@ -55,7 +55,7 @@ main = hakyll $ do
 
     postCtx = dateField "date" "%Y-%m-%d"
           <>  descriptionAutoField
-          <>  postSourceUrlField
+          <>  postActionsFields
           <>  defaultContext
 
     loadPostsContent = loadAllSnapshots "posts/*" "content" >>= recentFirst
@@ -107,8 +107,15 @@ descriptionAutoField = field "description" $
         & fmap (fromMaybe itemBody)
 
 
-postSourceUrlField :: Context String
-postSourceUrlField = field "postSourceUrl" $
-    \Item{itemIdentifier} -> return $
-        "https://github.com/cblp/cblp.github.io/blob/source/"
-        <> toFilePath itemIdentifier
+postActionsFields :: Context String
+postActionsFields = mconcat
+    [ field "postSourceUrl" $ return . githubActionUrl "blob"
+    , field "postEditUrl"   $ return . githubActionUrl "edit"
+    ]
+  where
+    githubActionUrl action Item{itemIdentifier} = mconcat
+        [ "https://github.com/cblp/cblp.github.io/"
+        , action
+        , "/source/"
+        , toFilePath itemIdentifier
+        ]
