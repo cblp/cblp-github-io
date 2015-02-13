@@ -73,6 +73,7 @@ div#footer {
 #postActions {
     text-align: center;
     margin-top: 2em;
+    font-family: monospace;
 }
 
 #disqus_thread {
